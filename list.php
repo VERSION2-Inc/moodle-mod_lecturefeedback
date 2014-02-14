@@ -4,7 +4,7 @@
     require_once("lib.php");
 
     $id                     = required_param('id', PARAM_INT);    // Course Module ID
-    $act                    = optional_param('act', NULL, PARAM_TEXT); 
+    $act                    = optional_param('act', NULL, PARAM_TEXT);
 
     if (! $cm = $DB->get_record("course_modules", array("id" => $id))) {
         error("Course Module ID was incorrect");
@@ -13,29 +13,29 @@
     if (! $course = $DB->get_record("course", array("id" => $cm->course))) {
         error("Course module is misconfigured");
     }
-    
-    $context       = get_context_instance(CONTEXT_MODULE, $cm->id);
+
+    $context       = context_module::instance($cm->id);
 
     require_login($course->id);
 
     if (!has_capability('mod/lecturefeedback:teacher', $context)) {
         error("Only teachers can look at this page");
     }
-    
+
     if (! $lecturefeedback = $DB->get_record("lecturefeedback", array("id" => $cm->instance))) {
         error("Course module is incorrect");
     }
-    
+
     if ($act != "getcsv") {
       $PAGE->set_url('/mod/lecturefeedback/list.php', array('id' => $id));
-      
+
       $title = $course->shortname . ': ' . format_string($lecturefeedback->name);
       $PAGE->set_title($title);
       $PAGE->set_heading($course->fullname);
       $PAGE->set_cm($cm);
-      
+
       echo $OUTPUT->header();
-      
+
       echo '<input type="button" name="getcsv" value="'.get_string('downloadcsv','lecturefeedback').'" onclick="location.href=\'list.php?id='.$id.'&act=getcsv\'" />';
 
       echo "-----------------------------------------------------------------------------------------------------------<br>\n";
@@ -52,8 +52,8 @@
       echo "-----------------------------------------------------------------------------------------------------------<br><br>\n";
     }
 /// Print out the lecturefeedback entries
-    
-    $kinds = split(",",$lecturefeedback->kinds);
+
+    $kinds = explode(",",$lecturefeedback->kinds);
     $eee = $DB->get_records_sql("SELECT * FROM {lecturefeedback_entries} WHERE lecturefeedback = ?", array($lecturefeedback->id));
     $t = "";
     if ( $eee ) {
@@ -82,9 +82,9 @@
       header("Content-Disposition: attachment; filename=userslist.csv");
       header("Pragma: no-cache");
       header("Expires: 0");
-      
+
       echo $t;
     }
- 
+
 
 

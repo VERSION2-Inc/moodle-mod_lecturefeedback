@@ -3,7 +3,7 @@
 /*
 if (!isset($CFG->lecturefeedback_showrecentactivity)) {
     set_config("lecturefeedback_showrecentactivity", true);
-} 
+}
 */
 
 
@@ -14,15 +14,15 @@ function lecturefeedback_add_instance($lecturefeedback) {
     global $CFG, $USER, $DB;
 
     $lecturefeedback->timemodified = time();
-    
+
     if (!$lecturefeedback->notice)
       $lecturefeedback->notice = 0;
-    
+
     if (!$lecturefeedback->showfeedback)
       $lecturefeedback->showfeedback = 0;
 
     $lecturefeedback->id = $DB->insert_record("lecturefeedback", $lecturefeedback);
- 
+
     lecturefeedback_grade_item_update($lecturefeedback);
 
     return $lecturefeedback->id;
@@ -35,10 +35,10 @@ function lecturefeedback_update_instance($lecturefeedback) {
     $lecturefeedback->timemodified = time();
     $lecturefeedback->id = $lecturefeedback->instance;
 
-    if (!$lecturefeedback->notice)
+    if (empty($lecturefeedback->notice))
       $lecturefeedback->notice = 0;
-    
-    if (!$lecturefeedback->showfeedback)
+
+    if (empty($lecturefeedback->showfeedback))
       $lecturefeedback->showfeedback = 0;
 
     lecturefeedback_grade_item_update($lecturefeedback);
@@ -85,7 +85,7 @@ function lecturefeedback_supports($feature) {
 
 function lecturefeedback_user_outline($course, $user, $mod, $lecturefeedback) {
     global $CFG, $USER, $DB;
-    
+
     if ($entry = $DB->get_record("lecturefeedback_entries", array("userid" => $user->id, "lecturefeedback" => $lecturefeedback->id))) {
         $numwords = count(preg_split("/\w\b/", $entry->text)) - 1;
         $result->info = get_string("numwords", "", $numwords);
@@ -98,7 +98,7 @@ function lecturefeedback_user_outline($course, $user, $mod, $lecturefeedback) {
 
 function lecturefeedback_user_complete($course, $user, $mod, $lecturefeedback) {
     global $CFG, $USER, $DB, $OUTPUT;
-    
+
     if ($entry = $DB->get_record("lecturefeedback_entries", array("userid" => $user->id, "lecturefeedback" => $lecturefeedback->id))) {
         echo $OUTPUT->box_start('generalbox');
         if ($entry->modified) {
@@ -124,9 +124,9 @@ function lecturefeedback_user_complete_index($course, $user, $lecturefeedback, $
     if (! $cm = $DB->get_record("course_modules", array("id" => $lecturefeedback->coursemodule))) {
         error("Course Module ID was incorrect");
     }
-    
-    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
-    
+
+    $context = context_module::instance($cm->id);
+
     if (has_capability('mod/lecturefeedback:teacher', $context)) {
         $entrycount = lecturefeedback_count_entries($lecturefeedback, get_current_group($course->id));
         $entryinfo  = "&nbsp;(<a href=\"report.php?id=$lecturefeedback->coursemodule\">".get_string("viewallentries","lecturefeedback", $entrycount)."</a>)";
@@ -147,7 +147,7 @@ function lecturefeedback_user_complete_index($course, $user, $lecturefeedback, $
     echo $OUTPUT->box_end();
     echo "<br clear=\"all\" />";
     echo "<br />";
-    
+
     if (has_capability('mod/lecturefeedback:student', $context) or has_capability('mod/lecturefeedback:teacher', $context)) {
         echo $OUTPUT->box_start('generalbox');
 
@@ -158,7 +158,7 @@ function lecturefeedback_user_complete_index($course, $user, $lecturefeedback, $
             echo "<p align=\"right\"><a href=\"view.php?id=$lecturefeedback->coursemodule\">";
             echo get_string("view")."</a></p>";
         }
-    
+
         if ($entry = $DB->get_record("lecturefeedback_entries", array("userid" => $user->id, "lecturefeedback" => $lecturefeedback->id))) {
             if ($entry->modified) {
                 echo "<p align=\"center\"><font size=\"1\">".get_string("lastedited").": ".userdate($entry->modified)."</font></p>";
@@ -175,7 +175,7 @@ function lecturefeedback_user_complete_index($course, $user, $lecturefeedback, $
         } else {
             print_string("noentry", "lecturefeedback");
         }
-    
+
         echo $OUTPUT->box_end();
         echo "<br clear=\"all\" />";
         echo "<br />";
@@ -186,7 +186,7 @@ function lecturefeedback_user_complete_index($course, $user, $lecturefeedback, $
 
 function lecturefeedback_cron() {
     global $CFG, $USER, $DB, $OUTPUT, $context;
-    
+
     $cutofftime = time() - $CFG->maxeditingtime;
 
     if ($entries = lecturefeedback_get_unmailed_graded($cutofftime)) {
@@ -198,9 +198,9 @@ function lecturefeedback_cron() {
                 echo "Could not find user $entry->userid\n";
                 continue;
             }
-            
+
             $USER->lang = $user->lang;
-            
+
             if (! $course = $DB->get_record("course", array("id" => $entry->course))) {
                 echo "Could not find course $entry->course\n";
                 continue;
@@ -271,12 +271,13 @@ function lecturefeedback_print_recent_activity($course, $isteacher, $timestart) 
                                            "`module` = 'lecturefeedback' AND ".
                                            "(`action` = 'add entry' OR `action` = 'update entry') ORDER BY time ASC", array($timestart, $course->id))){
         return false;
-    } 
+    }
 
     foreach ($logs as $log) {
         $j_log_info = lecturefeedback_log_info($log);
 
         //Create a temp valid module structure (course,id)
+        $tempmod = new \stdClass();
         $tempmod->course = $log->course;
         $tempmod->id = $j_log_info->id;
         //Obtain the visible property from the instance
@@ -300,13 +301,13 @@ function lecturefeedback_print_recent_activity($course, $isteacher, $timestart) 
                                        $CFG->wwwroot.'/mod/lecturefeedback/'.$lecturefeedback->url);
         }
     }
- 
+
     return $content;
 }
 
 function lecturefeedback_grade_item_update($lecturefeedback, $grades=NULL) {
     global $CFG, $USER, $DB;
-    
+
     if (!function_exists('grade_update')) { //workaround for buggy PHP versions
         require_once($CFG->libdir.'/gradelib.php');
     }
@@ -338,7 +339,7 @@ function lecturefeedback_grade_item_update($lecturefeedback, $grades=NULL) {
     if ($lecturefeedback->name) {
         grade_update('mod/lecturefeedback', $lecturefeedback->courseid, 'mod', 'lecturefeedback', $lecturefeedback->id, 0, $grades, $params);
     }
-    
+
     return true;
 }
 
@@ -371,9 +372,9 @@ function lecturefeedback_get_participants($lecturefeedbackid) {
 
 function lecturefeedback_scale_used ($lecturefeedbackid,$scaleid) {
     global $CFG, $USER, $DB;
-    
-    $return = false;                  
-                                 
+
+    $return = false;
+
     $rec = $DB->get_record("lecturefeedback",array("id" => $lecturefeedbackid, "assessed" => "-$scaleid"));
 
     if (!empty($rec) && !empty($scaleid)) {
@@ -383,17 +384,26 @@ function lecturefeedback_scale_used ($lecturefeedbackid,$scaleid) {
     return $return;
 }
 
+/**
+ *
+ * @param int $scaleid
+ * @return boolean
+ */
+function lecturefeedback_scale_used_anywhere($scaleid) {
+	return false;
+}
+
 // SQL FUNCTIONS ///////////////////////////////////////////////////////////////////
 
 function lecturefeedback_get_users_done($lecturefeedback) {
     global $CFG, $USER, $DB;
-    
+
     $userslist = $DB->get_records("lecturefeedback_entries", array("lecturefeedback" => $lecturefeedback->id), "modified DESC");
 
     foreach ($userslist as $userslist_) {
         $newarray[$userslist_->userid] = $DB->get_record("user", array("id" => $userslist_->userid));
     }
-    
+
     return $newarray;
 }
 
@@ -406,12 +416,12 @@ function lecturefeedback_count_entries($lecturefeedback, $groupid=0) {
 
 function lecturefeedback_get_unmailed_graded($cutofftime) {
     global $CFG, $USER, $DB;
-    
+
     return $DB->get_records_sql("SELECT e.*, j.course, j.name
-                              FROM {lecturefeedback_entries} e, 
+                              FROM {lecturefeedback_entries} e,
                                    {lecturefeedback} j
-                             WHERE e.mailed = '0' 
-                               AND e.timemarked < ? 
+                             WHERE e.mailed = '0'
+                               AND e.timemarked < ?
                                AND e.timemarked > 0
                                AND e.lecturefeedback = j.id
                                AND j.notice = 1", array($cutofftime));	//sekiya2004
@@ -419,12 +429,12 @@ function lecturefeedback_get_unmailed_graded($cutofftime) {
 
 function lecturefeedback_log_info($log) {
     global $CFG, $USER, $DB;
-    
+
     return $DB->get_record_sql("SELECT j.*, u.firstname, u.lastname
-                             FROM {lecturefeedback} j, 
-                                  {lecturefeedback_entries} e, 
+                             FROM {lecturefeedback} j,
+                                  {lecturefeedback_entries} e,
                                   {user} u
-                            WHERE e.id = ? 
+                            WHERE e.id = ?
                               AND e.lecturefeedback = j.id
                               AND e.userid = u.id", array($log->info));
 }
@@ -435,7 +445,7 @@ function lecturefeedback_print_user_entry($course, $user, $entry, $teachers, $gr
     global $CFG, $USER, $DB, $OUTPUT;
 
     echo "\n<table border=\"1\" cellspacing=\"0\" valign=\"top\" cellpadding=\"10\">";
-        
+
     echo "\n<tr>";
     echo "\n<td rowspan=\"2\" width=\"35\" valign=\"top\" class=\"lborder\">";
     echo $OUTPUT->user_picture($user);
@@ -473,7 +483,7 @@ function lecturefeedback_print_user_entry($course, $user, $entry, $teachers, $gr
 
         //sekiya2006 start
         if ( $kinds ) {
-            echo get_string("category","lecturefeedback").": ";  
+            echo get_string("category","lecturefeedback").": ";
             $kindsArray = make_menu_from_list($kinds);
             for( $ii=1; $ii<=sizeof($kindsArray); $ii++ ) {
                 $chk = "";
@@ -513,7 +523,7 @@ function lecturefeedback_print_feedback($course, $entry, $grades) {
     echo '<td class="entrycontent lborder">';
 
     echo '<div class="grade">';
-    
+
     if (!empty($entry->rating) and !empty($grades[$entry->rating])) {
         echo get_string('grade').': ';
         echo $grades[$entry->rating];

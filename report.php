@@ -5,9 +5,9 @@
     require_once($CFG->libdir.'/gradelib.php');
 
     $id                     = required_param('id', PARAM_INT);   // course module
-    $act                    = optional_param('act', NULL, PARAM_TEXT); 
-    $text                   = optional_param('text', NULL, PARAM_TEXT); 
-    $format                 = optional_param('format', NULL, PARAM_TEXT); 
+    $act                    = optional_param('act', NULL, PARAM_TEXT);
+    $text                   = optional_param('text', NULL, PARAM_TEXT);
+    $format                 = optional_param('format', NULL, PARAM_TEXT);
 
     if (! $cm = $DB->get_record("course_modules", array("id" => $id))) {
         error("Course Module ID was incorrect");
@@ -18,10 +18,10 @@
     }
 
     require_login($course->id, false);
-    
-    
-    $context       = get_context_instance(CONTEXT_MODULE, $cm->id);
-    $contextcourse = get_context_instance(CONTEXT_COURSE, $course->id);
+
+
+    $context       = context_module::instance($cm->id);
+    $contextcourse = context_course::instance($course->id);
 
     if (!has_capability('mod/lecturefeedback:teacher', $context)) {
         error("Only teachers can look at this page");
@@ -49,14 +49,14 @@
 // Initialize $PAGE, compute blocks
 
     $PAGE->set_url('/mod/lecturefeedback/report.php', array('id' => $id));
-    
+
     $title = $course->shortname . ': ' . format_string($lecturefeedback->name);
     $PAGE->set_title($title);
     $PAGE->set_heading($course->fullname);
     $PAGE->set_cm($cm);
-    
+
     echo $OUTPUT->header();
-    
+
     echo '<style>
     .lborder {
       border: 1px solid black;
@@ -69,7 +69,7 @@
     } else {
         $currentgroup = false;
     }
-    
+
 
 /// Process incoming data if there is any
     if ($act == 'savedata') {
@@ -84,7 +84,7 @@
                 $feedback[$num][$type] = $val;
             }
         }
-        
+
 
         $timenow = time();
         $count = 0;
@@ -92,6 +92,7 @@
             $entry = $entrybyentry[$num];
             // Only update entries where feedback has actually changed.
             if (($vals['r'] <> $entry->rating) || ($vals['c'] <> addslashes($entry->comment)) || ($vals['k'] <> $entry->kind) ) {  //sekiya2006
+            	$newentry = new \stdClass();
               $newentry->rating     = $vals['r'];
               $newentry->comment    = $vals['c'];
               $newentry->kind       = $vals['k'];	//sekiya2006
@@ -109,12 +110,12 @@
               $entrybyuser[$entry->userid]->kind       = $vals['k'];	//sekiya2006
               $entrybyuser[$entry->userid]->teacher    = $USER->id;
               $entrybyuser[$entry->userid]->timemarked = $timenow;
-                
+
                 //Set Grades------------------------------------------//
               if ($newentry->rating > 0) {
                 $catdata = $DB->get_record("grade_items", array("courseid" => $course->id, "iteminstance" => $lecturefeedback->id, "itemmodule" => 'lecturefeedback'));
                 $studentdata = $DB->get_record("lecturefeedback_entries", array("id" => $newentry->id));
-                
+
                 $gradesdata = new object;
                 $gradesdata->itemid = $catdata->id;
                 $gradesdata->userid = $studentdata->userid;
@@ -123,19 +124,19 @@
                 $gradesdata->usermodified = $studentdata->userid;
                 $gradesdata->timecreated = time();
                 $gradesdata->timemodified = time();
-                
+
                 if (!$grid = $DB->get_record("grade_grades", array("itemid" => $gradesdata->itemid, "userid" => $gradesdata->userid))) {
                     $grid = $DB->insert_record("grade_grades", $gradesdata);
                 } else {
                     $gradesdata->id = $grid->id;
                     $DB->update_record("grade_grades", $gradesdata);
                 }
-                
+
                 //Count all grades
                 $coursedata = $DB->get_record("grade_items", array("courseid" => $course->id, "itemtype" => 'course'));
                 $total1 = 0;
                 $totalcount = 0;
-                
+
                 $allcoursegrades = $DB->get_records("grade_items", array("courseid" => $course->id));
                 foreach ($allcoursegrades as $allcoursegrade) {
                     $usercoursegrade = $DB->get_record("grade_grades", array("itemid" => $allcoursegrade->id, "userid" => $gradesdata->userid));
@@ -148,9 +149,9 @@
                         $total1 += round(($usercoursegrade->finalgrade / $usercoursegrade->rawgrademax) * 100);
                     }
                 }
-                
+
                 $total = round(($total1/$totalcount), 2);
-                
+
                 if ($grid = $DB->get_record("grade_grades", array("itemid" => $coursedata->id, "userid" => $gradesdata->userid))) {
                     $DB->set_field("grade_grades", "finalgrade", $total, array("id" => $grid->id));
                 } else {
@@ -173,7 +174,7 @@
     } else {
         add_to_log($course->id, "lecturefeedback", "view responses", "report.php?id=$cm->id", "$lecturefeedback->id", $cm->id);
     }
-    
+
 
 /// Print out the lecturefeedback entries
 
@@ -182,7 +183,7 @@
     } else {
         $users = get_enrolled_users($context, 'mod/lecturefeedback:student', NULL);
     }
-    
+
 
     if (!$users) {
         echo $OUTPUT->heading(get_string("nousersyet"));
@@ -190,7 +191,7 @@
         $grades = make_grades_menu($lecturefeedback->assessed);
         $teachers = get_enrolled_users($context, 'mod/lecturefeedback:teacher', NULL);
         $kinds = $lecturefeedback->kinds;   //sekiya2006
-        
+
         $allowedtograde = ($groupmode != VISIBLEGROUPS or has_capability('mod/lecturefeedback:teacher', $context) or groups_is_member($currentgroup, $USER->id));
 
         if ($allowedtograde) {

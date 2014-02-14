@@ -12,8 +12,8 @@
     if (! $course = $DB->get_record("course", array("id" => $cm->course))) {
         error("Course module is misconfigured");
     }
-    
-    $context       = get_context_instance(CONTEXT_MODULE, $cm->id);
+
+    $context       = context_module::instance($cm->id);
 
     require_login($course->id);
 
@@ -26,16 +26,16 @@
     }
 
     $PAGE->set_url('/mod/lecturefeedback/extract.php', array('id' => $id));
-    
+
     $title = $course->shortname . ': ' . format_string($lecturefeedback->name);
     $PAGE->set_title($title);
     $PAGE->set_heading($course->fullname);
     $PAGE->set_cm($cm);
-    
+
     echo $OUTPUT->header();
 
 /// Print out the lecturefeedback entries
-    
+
     $kinds = $lecturefeedback->kinds;
     $kindsArray = make_menu_from_list($kinds);
     for( $ii=1; $ii<=sizeof($kindsArray); $ii++ ) {
@@ -50,7 +50,7 @@
             echo "*<br>\n";
         }
     }
-    
+
     echo $OUTPUT->footer();
- 
+
 

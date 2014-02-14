@@ -1,5 +1,6 @@
 <?php
 
+$string['lecturefeedback:addinstance'] = 'Add a new lecture feedback';
 $string['modulename'] = 'LectureFeedback';
 $string['modulenameplural'] = 'LectureFeedback';
 $string['pluginname'] = 'LectureFeedback';
@@ -28,9 +29,9 @@ $string['lecturefeedback:student'] = 'Course Student';
 $string['lecturefeedback:teacher'] = 'Course Teacher';
 $string['blankentry'] = 'Blank Entry';                                       //!!
 $string['nousersyet'] = 'No users';                                       //!!
-$string['saveallfeedback'] = 'Save all my feedback'; 
-$string['editingended'] = 'Last Edition'; 
-$string['downloadcsv'] = 'Dovnload CSV file'; 
+$string['saveallfeedback'] = 'Save all my feedback';
+$string['editingended'] = 'Last Edition';
+$string['downloadcsv'] = 'Dovnload CSV file';
 $string['feedbackupdated'] = 'Feedback was updated';                                       //!!
 $string['textformat'] = 'Formatting text';
 $string['textformat_help'] = '
@@ -38,7 +39,7 @@ $string['textformat_help'] = '
    to produce your text, depending on your expertise and the type of browser
    you are using.</p>
 
-<p><b>Usually you can just leave this setting to the default value and things 
+<p><b>Usually you can just leave this setting to the default value and things
       should work as you expect</b>.</p>
 ';
 
