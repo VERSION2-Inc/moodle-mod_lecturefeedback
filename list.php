@@ -67,7 +67,7 @@
             $t .= "\"".htmlspecialchars($st)."\",";
             $t .= "\"".$ee->comment."\",";
             $t .= "\"".$ee->rating."\",";
-            $t .= "\"".$kinds[$ee->kind-1]."\",";
+            $t .= "\"".(isset($kinds[$ee->kind-1]) ? $kinds[$ee->kind-1] : '')."\",";
             $t .= "\"".date("Y/m/d H:i:s",$ee->modified)."\"{sep}\n";
         }
     }
