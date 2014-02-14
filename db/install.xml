@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="mod/reader/db" VERSION="20090509" COMMENT="LectureFeedback Module tables"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="lecturefeedback" COMMENT="Main information" NEXT="lecturefeedback_entries">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="true" NEXT="course"/>
+        <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="name"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" PREVIOUS="course" NEXT="intro"/>
+        <FIELD NAME="intro" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="name" NEXT="introformat"/>
+        <FIELD NAME="introformat" TYPE="int" LENGTH="2" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="intro" NEXT="days"/>
+        <FIELD NAME="days" TYPE="int" LENGTH="5" NOTNULL="false" UNSIGNED="true" DEFAULT="7" SEQUENCE="false" PREVIOUS="introformat" NEXT="assessed"/>
+        <FIELD NAME="assessed" TYPE="char" LENGTH="10" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="days" NEXT="kinds"/>
+        <FIELD NAME="kinds" TYPE="text" LENGTH="medium" NOTNULL="false" SEQUENCE="false" PREVIOUS="assessed" NEXT="notice"/>
+        <FIELD NAME="notice" TYPE="int" LENGTH="2" NOTNULL="false" DEFAULT="1" SEQUENCE="false" PREVIOUS="kinds" NEXT="showfeedback"/>
+        <FIELD NAME="showfeedback" TYPE="int" LENGTH="2" NOTNULL="false" UNSIGNED="true" DEFAULT="1" SEQUENCE="false" PREVIOUS="notice" NEXT="timemodified"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="showfeedback"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="course_key" UNIQUE="false" FIELDS="course"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="lecturefeedback_entries" COMMENT="lecturefeedback_entries table retrofitted from MySQL" PREVIOUS="lecturefeedback">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="true" NEXT="lecturefeedback"/>
+        <FIELD NAME="lecturefeedback" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="userid"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="lecturefeedback" NEXT="modified"/>
+        <FIELD NAME="modified" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="userid" NEXT="text"/>
+        <FIELD NAME="text" TYPE="text" LENGTH="medium" NOTNULL="false" SEQUENCE="false" PREVIOUS="modified" NEXT="format"/>
+        <FIELD NAME="format" TYPE="int" LENGTH="2" NOTNULL="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="text" NEXT="rating"/>
+        <FIELD NAME="rating" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="format" NEXT="comment"/>
+        <FIELD NAME="comment" TYPE="text" LENGTH="medium" NOTNULL="false" SEQUENCE="false" PREVIOUS="rating" NEXT="kind"/>
+        <FIELD NAME="kind" TYPE="int" LENGTH="2" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="comment" NEXT="teacher"/>
+        <FIELD NAME="teacher" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="kind" NEXT="timemarked"/>
+        <FIELD NAME="timemarked" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="teacher" NEXT="mailed"/>
+        <FIELD NAME="mailed" TYPE="int" LENGTH="1" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timemarked"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="userid_key" UNIQUE="false" FIELDS="userid" NEXT="lecturefeedback_key"/>
+        <INDEX NAME="lecturefeedback_key" UNIQUE="false" FIELDS="lecturefeedback" PREVIOUS="userid_key"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>
