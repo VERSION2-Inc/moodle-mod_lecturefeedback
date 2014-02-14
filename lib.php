@@ -15,10 +15,10 @@ function lecturefeedback_add_instance($lecturefeedback) {
 
     $lecturefeedback->timemodified = time();
 
-    if (!$lecturefeedback->notice)
+    if (empty($lecturefeedback->notice))
       $lecturefeedback->notice = 0;
 
-    if (!$lecturefeedback->showfeedback)
+    if (empty($lecturefeedback->showfeedback))
       $lecturefeedback->showfeedback = 0;
 
     $lecturefeedback->id = $DB->insert_record("lecturefeedback", $lecturefeedback);
