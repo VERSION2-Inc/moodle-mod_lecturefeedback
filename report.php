@@ -65,7 +65,8 @@
 
 /// Check to see if groups are being used in this lecturefeedback
     if ($groupmode = groupmode($course, $cm)) {   // Groups are being used
-        $currentgroup = setup_and_print_groups($course, $groupmode, "report.php?id=$cm->id");
+        $currentgroup = groups_get_course_group($course, true);
+        groups_print_course_menu($course, "report.php?id=$cm->id");
     } else {
         $currentgroup = false;
     }
