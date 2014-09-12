@@ -90,6 +90,9 @@
         $timenow = time();
         $count = 0;
         foreach ($feedback as $num => $vals) {
+            if (!isset($vals['k'])) {
+                $vals['k'] = null;
+            }
             $entry = $entrybyentry[$num];
             // Only update entries where feedback has actually changed.
             if (($vals['r'] <> $entry->rating) || ($vals['c'] <> addslashes($entry->comment)) || ($vals['k'] <> $entry->kind) ) {  //sekiya2006
@@ -170,10 +173,22 @@
                 //lecturefeedback_grade_item_update($lecturefeedback);
             }
         }
-        add_to_log($course->id, "lecturefeedback", "update feedback", "report.php?id=$cm->id", "$count users", $cm->id);
+        $event = \mod_lecturefeedback\event\feedback_updated::create(array(
+            'context' => $context,
+            'objectid' => $lecturefeedback->id,
+            'other' => array('count' => $count)
+        ));
+        $event->add_record_snapshot('lecturefeedback', $lecturefeedback);
+        $event->trigger();
         notify(get_string("feedbackupdated", "lecturefeedback", "$count"), "notifysuccess");
     } else {
-        add_to_log($course->id, "lecturefeedback", "view responses", "report.php?id=$cm->id", "$lecturefeedback->id", $cm->id);
+        $event = \mod_lecturefeedback\event\feedback_viewed::create(array(
+            'context' => $context,
+            'objectid' => $lecturefeedback->id
+        ));
+        $event->add_record_snapshot('course', $course);
+        $event->add_record_snapshot('lecturefeedback', $lecturefeedback);
+        $event->trigger();
     }
 
 

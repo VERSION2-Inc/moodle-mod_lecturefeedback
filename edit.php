@@ -37,24 +37,40 @@
         $newentry = new StdClass();
 
         if ($entry) {
-            $newentry->id = $entry->id;
+            $newentry = clone $entry;
             $newentry->text = $text['text'];
             $newentry->format = $format;
             $newentry->modified = $timenow;
             if (! $DB->update_record("lecturefeedback_entries", $newentry)) {
                 error("Could not update your lecturefeedback");
             }
-            add_to_log($course->id, "lecturefeedback", "update entry", "view.php?id=$cm->id", "$newentry->id", $cm->id);
+            $event = \mod_lecturefeedback\event\entry_updated::create(array(
+                'context' => $context,
+                'objectid' => $newentry->id
+            ));
+            $event->add_record_snapshot('lecturefeedback_entries', $newentry);
+            $event->trigger();
         } else {
-            $newentry->userid = $USER->id;
             $newentry->lecturefeedback = $lecturefeedback->id;
+            $newentry->userid = $USER->id;
+            $newentry->modified = $timenow;
             $newentry->text = $text['text'];
             $newentry->format = $format;
-            $newentry->modified = $timenow;
+            $newentry->rating = 0;
+            $newentry->comment = null;
+            $newentry->kind = 0;
+            $newentry->teacher = 0;
+            $newentry->timemarked = 0;
+            $newentry->mailed = 0;
             if (! $newentry->id = $DB->insert_record("lecturefeedback_entries", $newentry)) {
                 error("Could not insert a new lecturefeedback entry");
             }
-            add_to_log($course->id, "lecturefeedback", "add entry", "view.php?id=$cm->id", "$newentry->id", $cm->id);
+            $event = \mod_lecturefeedback\event\entry_created::create(array(
+                'context' => $context,
+                'objectid' => $newentry->id
+            ));
+            $event->add_record_snapshot('lecturefeedback_entries', $newentry);
+            $event->trigger();
         }
 
         redirect("view.php?id=$cm->id");

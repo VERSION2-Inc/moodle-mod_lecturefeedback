@@ -21,7 +21,14 @@
         error("Course module is incorrect");
     }
 
-    add_to_log($course->id, "lecturefeedback", "view", "view.php?id=$cm->id", $lecturefeedback->id, $cm->id);
+    $event = \mod_lecturefeedback\event\course_module_viewed::create(array(
+        'objectid' => $lecturefeedback->id,
+        'context' => $context
+    ));
+    $event->add_record_snapshot('course_modules', $cm);
+    $event->add_record_snapshot('course', $course);
+    $event->add_record_snapshot('lecturefeedback', $lecturefeedback);
+    $event->trigger();
 
     if (! $cw = $DB->get_record("course_sections", array("id" => $cm->section))) {
         error("Course module is incorrect");

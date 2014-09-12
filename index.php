@@ -11,7 +11,10 @@
 
     require_login($course->id);
     
-    add_to_log($course->id, "lecturefeedback", "view all", "index.php?id=$course->id", "");
+    $event = \mod_lecturefeedback\event\course_module_instance_list_viewed::create(array(
+        'context' => context_course::instance($course->id)
+    ));
+    $event->trigger();
 
     $strlecturefeedback = get_string("modulename", "lecturefeedback");
     $strlecturefeedbacks = get_string("modulenameplural", "lecturefeedback");
