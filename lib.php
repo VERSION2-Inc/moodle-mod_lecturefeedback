@@ -128,7 +128,7 @@ function lecturefeedback_user_complete_index($course, $user, $lecturefeedback, $
     $context = context_module::instance($cm->id);
 
     if (has_capability('mod/lecturefeedback:teacher', $context)) {
-        $entrycount = lecturefeedback_count_entries($lecturefeedback, get_current_group($course->id));
+        $entrycount = lecturefeedback_count_entries($lecturefeedback, groups_get_course_group($course));
         $entryinfo  = "&nbsp;(<a href=\"report.php?id=$lecturefeedback->coursemodule\">".get_string("viewallentries","lecturefeedback", $entrycount)."</a>)";
     } else {
         $entryinfo = "";
