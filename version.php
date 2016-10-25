@@ -6,7 +6,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // Original version: 2012030700
-$module->version  = 2014091200;
-$module->cron     = 60;
+defined('MOODLE_INTERNAL') || die();
+
+$plugin->component = 'mod_lecturefeedback'; // Full name of the plugin (used for diagnostics).
+$plugin->version  = 2014091200;
+$plugin->cron     = 60;
 
 
