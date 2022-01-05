@@ -48,6 +48,7 @@ class mod_lecturefeedback_mod_form extends moodleform_mod {
         }
 
         $mform->addElement('select', 'assessed', get_string('grade', 'lecturefeedback'), $grades);
+        $mform->addElement('hidden', 'scale', '1');
 
         $options = array();
         $options[0] = get_string('alwaysopen', 'lecturefeedback');

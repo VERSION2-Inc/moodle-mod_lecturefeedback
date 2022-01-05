@@ -99,7 +99,7 @@
 
     echo $OUTPUT->header();
 
-    echo "<center>\n";
+    //echo "<center>\n";
 
     echo $OUTPUT->box_start('generalbox');
 

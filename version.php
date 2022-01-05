@@ -9,7 +9,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_lecturefeedback'; // Full name of the plugin (used for diagnostics).
-$plugin->version  = 2014091200;
+$plugin->version  = 20211020001;
 $plugin->cron     = 60;
 
 

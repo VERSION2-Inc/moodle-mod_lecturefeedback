@@ -64,7 +64,7 @@
     </style>';
 
 /// Check to see if groups are being used in this lecturefeedback
-    if ($groupmode = groupmode($course, $cm)) {   // Groups are being used
+    if ($groupmode = groups_get_activity_groupmode($cm, $course)) {   // Groups are being used
         $currentgroup = groups_get_course_group($course, true);
         groups_print_course_menu($course, "report.php?id=$cm->id");
     } else {
@@ -95,7 +95,7 @@
             }
             $entry = $entrybyentry[$num];
             // Only update entries where feedback has actually changed.
-            if (($vals['r'] <> $entry->rating) || ($vals['c'] <> addslashes($entry->comment)) || ($vals['k'] <> $entry->kind) ) {  //sekiya2006
+            //if (($vals['r'] <> $entry->rating) || ($vals['c'] <> addslashes($entry->comment)) || ($vals['k'] <> $entry->kind) ) {  //sekiya2006
             	$newentry = new \stdClass();
               $newentry->rating     = $vals['r'];
               $newentry->comment    = $vals['c'];
@@ -105,7 +105,7 @@
               $newentry->mailed     = 0;           // Make sure mail goes out (again, even)
               $newentry->id         = $num;
               if (! $DB->update_record("lecturefeedback_entries", $newentry)) {
-                  notify("Failed to update the lecturefeedback feedback for user $entry->userid");
+                  $OUTPUT->notification("Failed to update the lecturefeedback feedback for user $entry->userid");
               } else {
                   $count++;
               }
@@ -120,7 +120,7 @@
                 $catdata = $DB->get_record("grade_items", array("courseid" => $course->id, "iteminstance" => $lecturefeedback->id, "itemmodule" => 'lecturefeedback'));
                 $studentdata = $DB->get_record("lecturefeedback_entries", array("id" => $newentry->id));
 
-                $gradesdata = new object;
+                $gradesdata = new stdclass();
                 $gradesdata->itemid = $catdata->id;
                 $gradesdata->userid = $studentdata->userid;
                 $gradesdata->rawgrade = $newentry->rating;
@@ -159,7 +159,7 @@
                 if ($grid = $DB->get_record("grade_grades", array("itemid" => $coursedata->id, "userid" => $gradesdata->userid))) {
                     $DB->set_field("grade_grades", "finalgrade", $total, array("id" => $grid->id));
                 } else {
-                    $totalgrade = new object;
+                    $totalgrade = new stdclass();
                     $totalgrade->itemid = $coursedata->id;
                     $totalgrade->userid = $gradesdata->userid;
                     $totalgrade->usermodified = $gradesdata->userid;
@@ -171,7 +171,7 @@
                 }
               }
                 //lecturefeedback_grade_item_update($lecturefeedback);
-            }
+            //}
         }
         $event = \mod_lecturefeedback\event\feedback_updated::create(array(
             'context' => $context,
@@ -180,7 +180,7 @@
         ));
         $event->add_record_snapshot('lecturefeedback', $lecturefeedback);
         $event->trigger();
-        notify(get_string("feedbackupdated", "lecturefeedback", "$count"), "notifysuccess");
+        $OUTPUT->notification(get_string("feedbackupdated", "lecturefeedback", "$count"), "notifysuccess");
     } else {
         $event = \mod_lecturefeedback\event\feedback_viewed::create(array(
             'context' => $context,
